@@ -15,7 +15,6 @@ Nginx: Reverse proxy for routing traffic to services
 
 <!-- Forced Line Break -->
 <br><br>
-================================================================
 <!-- Forced Line Break -->
 <br><br>
 
@@ -132,12 +131,11 @@ the fundamental difference between Continuous Delivery and Continuous Deployment
 
 
 
-<!-- Forced Line Break -->
-<br><br>
-================================================================
-<!-- Forced Line Break -->
-<br><br>
 
+
+<br><br>
+<!-- Forced Line Break -->
+<br><br>
 
 
 ## Goal: Deploy Forgejo (self-hosted Git server), Jenkins, and Nginx using Docker Compose, then configure Forgejo with a repository and webhook.
@@ -325,9 +323,8 @@ Click Add Webhook
 
 
 
-<!-- Forced Line Break -->
+
 <br><br>
-================================================================
 <!-- Forced Line Break -->
 <br><br>
 
@@ -438,12 +435,9 @@ When you push code to Forgejo, the webhook will automatically trigger the Jenkin
 
 
 
+<br><br>
 <!-- Forced Line Break -->
 <br><br>
-================================================================
-<!-- Forced Line Break -->
-<br><br>
-
 
 
 ## Goal: Provision and configure the second EC2 instance that will run our deployed application.
@@ -583,9 +577,7 @@ Click Check to validate your setup before proceeding.
 
 
 
-<!-- Forced Line Break -->
 <br><br>
-================================================================
 <!-- Forced Line Break -->
 <br><br>
 
@@ -689,12 +681,10 @@ You should see a message like:
 Hi there, <username>! You've successfully authenticated...
 
 If you see this, your SSH connection is working!
-<!-- Forced Line Break -->
-<br><br>
-================================================================
-<!-- Forced Line Break -->
-<br><br>
 
+<br><br>
+<!-- Forced Line Break -->
+<br><br>
 
 
 ## Goal: Create the Jenkinsfile, commit your code, and trigger the automated CI/CD pipeline.
@@ -847,9 +837,7 @@ Validate both EC2 instances are running for deployment.
 
 
 
-<!-- Forced Line Break -->
 <br><br>
-================================================================
 <!-- Forced Line Break -->
 <br><br>
 
@@ -882,5 +870,4 @@ Development to production automation
 Team collaboration with Git workflows
 Container orchestration and management
 
-<!-- Forced Line Break -->
-<br><br>
+
