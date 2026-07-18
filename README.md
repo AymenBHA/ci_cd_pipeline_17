@@ -1,7 +1,6 @@
 # In this project, we will build a complete CI/CD pipeline using Forgejo (Git), Jenkins, and Docker.
 
 How It Works:
-
 VM 1 (CI/CD Server): Hosts Forgejo (Git server), Jenkins (automation), and Docker Registry (image storage).
 VM 2 (Production Server): Runs the deployed application pulled from the registry.
 The Pipeline: Code push triggers webhook -> Jenkins builds Docker image -> Pushes to registry -> Deploys to VM 2.
@@ -12,13 +11,9 @@ Jenkins: Automation server that orchestrates the CI/CD pipeline
 Docker: Containerization for consistent deployments
 Nginx: Reverse proxy for routing traffic to services
 
-
-<!-- Forced Line Break -->
 <br><br>
 <!-- Forced Line Break -->
 <br><br>
-
-
 
 ## Goal: Provision and configure the first EC2 instance that will host Forgejo (Git server), Jenkins (automation), and Docker Registry (image storage).
 
@@ -46,9 +41,7 @@ ssh -i /path/to/your-key.pem ubuntu@<VM1_PUBLIC_IP>
 
 ### Step 3: Create Swap File (Prevents Jenkins from Crashing)
 Jenkins requires significant memory. A swap file acts as overflow memory when RAM is full.
-
 Run these commands one by one:
-
 ```bash
 # Create a 4GB swap file
 sudo fallocate -l 4G /swapfile
@@ -68,10 +61,7 @@ Verify swap is active:
 
 free -h
 ```
-
 You should see 4GB under the "Swap" row.
-
-
 
 ### Step 4: Install Docker & Docker Compose
 Docker will run our containers (Forgejo, Jenkins, Nginx).
@@ -96,7 +86,6 @@ docker compose version
 
 ### Step 5: Configure Insecure Registry
 We're running a private Docker registry on port 80 (not HTTPS). Docker needs to be told this is allowed.
-
 Important: Replace <VM1_PUBLIC_IP> with your actual VM 1 public IP address.
 ```bash
 echo '{"insecure-registries": ["<VM1_PUBLIC_IP>:80"]}' | sudo tee /etc/docker/daemon.json
@@ -106,7 +95,7 @@ Restart Docker to apply changes:
 sudo systemctl restart docker
 ```
 
-Step 6: Generate SSH Keys (For VM 1 to VM 2 Communication)
+### Step 6: Generate SSH Keys (For VM 1 to VM 2 Communication)
 Jenkins on VM 1 will need to SSH into VM 2 to deploy the application.
 ```bash
 ssh-keygen -t rsa -b 4096
@@ -120,31 +109,18 @@ View your public key (you'll need this later):
 ```bash
 cat ~/.ssh/id_rsa.pub
 ```
-<br><br>
+
 the fundamental difference between Continuous Delivery and Continuous Deployment is that delivery requires manual approval for release, deployment is fully automated
-
-
-
-
-
-
-
-
-
-
 
 <br><br>
 <!-- Forced Line Break -->
 <br><br>
-
 
 ## Goal: Deploy Forgejo (self-hosted Git server), Jenkins, and Nginx using Docker Compose, then configure Forgejo with a repository and webhook.
 
 ### Step 1: Create Project Directory and Environment File
 Still connected to VM 1, create a directory for our CI/CD stack:
 ```bash
-
-
 mkdir ~/cicd-stack && cd ~/cicd-stack
 
 Create the environment file:
@@ -157,7 +133,7 @@ EC2_IP=<VM1_PUBLIC_IP>
 
 Save and exit: Press Ctrl+X, then Y, then Enter
 
-Step 2: Create Nginx Configuration
+### Step 2: Create Nginx Configuration
 Nginx will act as a reverse proxy, routing traffic to Forgejo and Jenkins.
 ```bash
 
@@ -194,12 +170,9 @@ server {
 Save and exit: Ctrl+X, Y, Enter
 
 What this does:
-
 Requests to /jenkins go to Jenkins container
 All other requests go to Forgejo container
 Headers are forwarded so applications know the original request details
-
-
 
 ### Step 3: Create Docker Compose File
 This file defines all our services (Nginx, Forgejo, Jenkins).
@@ -267,7 +240,6 @@ Save and exit: Ctrl+X, Y, Enter
 ### Step 4: Start the Stack
 Launch all containers:
 ```bash
-
 docker compose up -d
 ```
 
@@ -277,12 +249,11 @@ Build the custom Jenkins image (takes 2-3 minutes)
 Download Forgejo and Nginx images
 Start all three containers
 Check that all containers are running:
-
+```bash
 docker ps
+```
 
 we should see 3 containers: nginx-proxy, forgejo, and jenkins
-
-
 
 ### Step 5: Configure Forgejo
 Access Forgejo: Open your browser and go to http://<VM1_PUBLIC_IP>/
@@ -298,7 +269,7 @@ Choose a username (remember this!)
 Enter an email (can be fake: user@example.com)
 Set a password
 Click Install Forgejo
-Important: The first user automatically becomes the administrator
+
 Create a Repository:
 
 Click the + icon (top right)
@@ -307,8 +278,8 @@ Repository Name: Choose a name (e.g., devspace, portfolio, myapp)
 Visibility: Private or Public (your choice)
 Leave other options as default
 Click Create Repository
-Add Webhook:
 
+Add Webhook:
 Inside your repository, click Settings (top right)
 Click Webhooks in the left sidebar
 Click Webhooks -> Add webhook -> Forgejo
@@ -319,27 +290,19 @@ Post Content Type: application/json
 Trigger On: Push events (should be checked by default)
 Click Add Webhook
 
-
-
-
-
-
 <br><br>
 <!-- Forced Line Break -->
 <br><br>
-
 
 ## Goal: Configure Jenkins to listen for webhook events from Forgejo and create a pipeline.
 
 ### Step 1: Access Jenkins
 Open your browser and go to: http://<VM1_PUBLIC_IP>/jenkins
-
 Install Plugins:
-
 Select Install suggested plugins
 Wait for installation to complete
-Create Admin User:
 
+Create Admin User:
 Fill in the form (or click "Skip and continue as admin")
 Click Save and Continue
 Click Save and Finish
@@ -347,31 +310,25 @@ Click Start using Jenkins
 
 ## Step 2: Install Required Plugins
 From Jenkins Dashboard, click Manage Jenkins (top right settings icon beside Sign in)
-
 Click Plugins
-
 Click Available plugins tab
 
 Search for and install these plugins:
-
 Generic Webhook Trigger (for Forgejo integration)
 Docker Pipeline (for building Docker images)
 SSH Agent (for deploying to VM 2)
 Check the box next to each plugin
 
 Click Install (bottom right)
-
 Check Restart Jenkins when installation is complete
-
 Wait for Jenkins to restart (refresh the page after 30 seconds)
 
 ### Step 3: Create Jenkins Credentials
 We need to store credentials for:
-
 SSH access to VM 2
 Forgejo registry access
-A. SSH Credential for VM 2:
 
+A. SSH Credential for VM 2:
 Go to Manage Jenkins -> Credentials
 Click (global) domain
 Click the prompt at the center (How about adding some credentials?)
@@ -380,6 +337,7 @@ Kind: SSH Username with private key
 ID: vm2-ssh (you'll use this in Jenkinsfile)
 Username: ubuntu
 Private Key: Click Enter directly
+
 Get the private key from VM 1:
 cat ~/.ssh/id_rsa
 
@@ -387,7 +345,6 @@ Copy the entire output (including -----BEGIN and -----END lines)
 Paste into Jenkins
 Click Create
 B. Forgejo Registry Credential:
-
 Click + Add Credentials
 Configure:
 Kind: Username with password
@@ -395,7 +352,7 @@ Username: Your Forgejo username
 Password: Your Forgejo password
 ID: forgejo-registry (you'll use this in Jenkinsfile)
 Click Create
-Step 4: Create Pipeline
+### Step 4: Create Pipeline
 Go back to Jenkins Dashboard
 
 Click New Item (left sidebar)
@@ -433,12 +390,9 @@ Forgejo sends events to: http://<VM1_IP>/jenkins/generic-webhook-trigger/invoke?
 Jenkins listens for token: devspace-token
 When you push code to Forgejo, the webhook will automatically trigger the Jenkins pipeline.
 
-
-
 <br><br>
 <!-- Forced Line Break -->
 <br><br>
-
 
 ## Goal: Provision and configure the second EC2 instance that will run our deployed application.
 
@@ -468,7 +422,6 @@ Click Connect
 Step 3: Install Docker
 Run these commands on VM 2:
 ```bash
-
 # Update package list and install Docker
 sudo apt update && sudo apt install -y docker.io docker-compose-v2
 
@@ -574,13 +527,9 @@ SSH access from VM 1 to VM 2 working
 Application directory and docker-compose.yml created
 Click Check to validate your setup before proceeding.
 
-
-
-
 <br><br>
 <!-- Forced Line Break -->
 <br><br>
-
 
 ## Goal: Configure your KodeKloud terminal as a development environment and connect it to Forgejo.
 
@@ -588,26 +537,20 @@ Click Check to validate your setup before proceeding.
 Git needs to know who is making commits. Run these commands in your KodeKloud terminal:
 
 ```bash
-
 git config --global user.name "Developer"
 git config --global user.email "dev@example.com"
 ```
-
 Verify the configuration:
-
 ```bash
-
 git config --global --list
 ```
 
 ### Step 2: Generate SSH Key
 Create an SSH key pair for authenticating with Forgejo:
 ```bash
-
 ssh-keygen -t rsa -b 4096
 ```
 Press Enter three times to:
-
 Accept default file location (~/.ssh/id_rsa)
 Skip passphrase (first prompt)
 Skip passphrase confirmation (second prompt)
@@ -615,7 +558,6 @@ Display your public key:
 ```bash
 cat ~/.ssh/id_rsa.pub
 ```
-
 Copy the entire output - you'll need this in the next step.
 
 ### Step 3: Add SSH Key to Forgejo
@@ -653,7 +595,6 @@ git remote add origin ssh://git@<VM1_PUBLIC_IP>:2222/<YOUR_USERNAME>/<YOUR_REPO>
 ```
 
 Important Notes:
-
 Replace <VM1_PUBLIC_IP> with VM 1's public IP
 Replace <YOUR_USERNAME> with your Forgejo username
 Replace <YOUR_REPO> with your repository name
@@ -668,18 +609,15 @@ Verify the remote:
 git remote -v
 ```
 
-Step 5: Test SSH Connection
+### Step 5: Test SSH Connection
 Test that you can connect to Forgejo via SSH:
 ```bash
 ssh -T git@<VM1_PUBLIC_IP> -p 2222
 ```
-
 You may see a message about host authenticity. Type yes and press Enter.
 
 You should see a message like:
-
 Hi there, <username>! You've successfully authenticated...
-
 If you see this, your SSH connection is working!
 
 <br><br>
@@ -692,7 +630,6 @@ If you see this, your SSH connection is working!
 ### Step 1: Update the Jenkinsfile
 The Jenkinsfile defines your CI/CD pipeline. In your KodeKloud terminal:
 ```bash
-
 cd ~/devspace
 sudo apt update && sudo apt install nano -y
 nano Jenkinsfile
@@ -722,7 +659,7 @@ VM2_SSH_CRED_ID: Should be vm2-ssh (the credential ID you created in Jenkins)
 FORGEJO_CRED_ID: Should be forgejo-registry (the credential ID you created in Jenkins)
 Save and exit: Ctrl+X, Y, Enter
 
-Step 2: Update Profile Picture
+### Step 2: Update Profile Picture
 If you want to add a GitHub profile picture:
 ```bash
 curl -s https://api.github.com/users/<YOUR_GITHUB_USERNAME> | grep -o 'https://avatars.githubusercontent.com/u/[^"]*' | xargs curl -o profile_picture.jpg
@@ -761,13 +698,11 @@ const PORTFOLIO_CONFIG = {
         { number: "100%", label: "Automated" }
     ]
 };
-
-
 ```
 
 Save and exit: Ctrl+X, Y, Enter
 
-Step 4: Commit and Push
+### Step 4: Commit and Push
 Add all files to Git:
 ```bash
 git add .
@@ -834,27 +769,18 @@ Application accessible at http://<VM2_PUBLIC_IP>/
 Automated deployment working on subsequent pushes
 Validate both EC2 instances are running for deployment.
 
-
-
-
 <br><br>
 <!-- Forced Line Break -->
 <br><br>
 
 What we've Built:
-
 Self-Hosted Git Server: Forgejo running on VM 1 with webhook integration
-
 Automation Server: Jenkins configured to listen for Git events and orchestrate deployments
-
 Container Registry: Docker registry hosted on VM 1 for storing application images
-
 Production Environment: VM 2 running your containerized application
-
 Automated Pipeline: Code push -> Build -> Test -> Deploy workflow
 
 Key Concepts Implemented:
-
 Webhook Integration: Automatic pipeline triggering on code push
 Containerization: Docker for consistent application packaging
 Registry Management: Private Docker registry for image storage
